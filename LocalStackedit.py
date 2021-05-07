@@ -158,5 +158,12 @@ if __name__ == "__main__":
 		with open(sys.argv[1], "r") as f:
 			browser.execute_script("arguments[0].innerHTML=arguments[1]", editorField, f.read())
 
+		# TODO Save on CTRL+S
+		# Menu button: <button> tour-step-anchor menu
+		#	<div> inner     Import/export
+		#		<div> menu-entry__text flex flex--column
+		#			<div>Export as Markdown
+
+
 	except KeyboardInterrupt:
 		on_close()	
