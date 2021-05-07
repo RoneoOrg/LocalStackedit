@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 import platform
-import os
+import os, sys
 import subprocess
 from time import sleep
 import pickle
@@ -12,6 +12,7 @@ try:
 	from selenium.webdriver.common.keys import Keys
 	from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException, WebDriverException
 	from selenium.webdriver.remote.command import Command
+	from selenium.webdriver.common.keys import Keys
 except ModuleNotFoundError as e:
 	print(f"Missing dependency: {e}. Run:\npip install -r requirements.txt")
 	exit(1)
@@ -77,7 +78,7 @@ def wait_for_element(element2Find: str) -> None:
 		else:
 			isFound = True
 
-	print("Page loaded.")
+	print(f"Page loaded with element of class {element2Find}.")
 	return
 
 
@@ -109,13 +110,22 @@ def on_close() -> None:
 #                                      MAIN
 # ==============================================================================
 if __name__ == "__main__":
+	# Check user input
+	if len(sys.argv) < 2:
+		print("The filename to open should be provided.")
+		exit(1)
+
 	try:
 		# Starts the browser
-		browser = webdriver.Chrome(
-				executable_path = WEBDRIVER,
-				options = OPTION
-			)
-
+		try:
+			browser = webdriver.Chrome(
+					executable_path = WEBDRIVER,
+					options = OPTION
+				)
+		except Exception as e:
+			print(e)
+			print("It's seem an instance of brave is already running. Only one instance allowed.")
+			exit(1)
 		# Loads cookies
 		if os.path.exists(COOKIES_FILE):
 			print("Loading cookies...")
@@ -129,7 +139,24 @@ if __name__ == "__main__":
 
 		# Open stakedit page
 		browser.get("https://stackedit.io/app#")
-		wait_for_element("editor__inner markdown-highlighting")
+		wait_for_element("editor")
+
+		# Get stackedit document title
+		titleField = browser.find_elements_by_tag_name("input")[0]
+		# Set the title
+		titleField.click()
+		docTitle = os.path.basename(sys.argv[1]).split(".")[0]
+		titleField.send_keys(docTitle)
+		
+		# Get stackedit editor area
+		editorField = browser.find_elements_by_class_name("editor")[0]
+		editorField = editorField.find_element_by_tag_name("pre")
+		# clear the editor
+		browser.execute_script("arguments[0].innerHTML=''", editorField)
+
+		# set the content of the editor
+		with open(sys.argv[1], "r") as f:
+			browser.execute_script("arguments[0].innerHTML=arguments[1]", editorField, f.read())
 
 	except KeyboardInterrupt:
 		on_close()	
