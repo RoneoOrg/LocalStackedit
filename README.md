@@ -1,8 +1,19 @@
-# <++>
+﻿This script aims to bodge the limit of [StackEdit.io](https://stackedit.io/) which cannot access local files.
+It opens in Brave (as an automated browser - Selenium) the file provided as first argument.
 
-**Version**: <++> 
+**Usage**:
+`python LocalStackedit.py <filepath>`
 
-<++>
+or (Linux only on a Python virtual env)
+`StackEdit.sh <filepath>`
+
+TODO: 
+- Save file as markdown and html on `ctrl + s`
+- no limit of instances (for now, it's limited to one)
+
+Depends on Brave-browser (version `90.1.24.82`)
+
+For future or ulterior versions of Brave, the proper driver can be downloaded on [Chrome's official website](https://chromedriver.storage.googleapis.com/index.html).
 
 ## Installation
 
@@ -29,7 +40,7 @@ git --version
 
 Clone it
 ```bash
-git clone <++> <Where you want to install it>
+git clone <++> 
 ```
 
 **Dependencies**
@@ -45,6 +56,13 @@ _On Windows_:
 ```bash
 pip install -r requirements.txt
 ```
+**Create a virtual environnement**
+Optional
+
+`python -m venv venv`
+
+Activate it
+`source ./venv/bin/activate`
 
 **Executable**
 
@@ -58,7 +76,7 @@ chmod +x <++>
 If you want to access it directly from the terminal (Linux and MacOsX) with the command `<++>`:
 
 ```bash
-INSTALL_DIR="<the full path to the installation directory>"
+INSTALL_DIR=""
 printf "# <++>\nalias <++>='${INSTALL_DIR}/<++>.py'" >> ~/.bash_aliases
 ```
 
@@ -68,26 +86,9 @@ printf "# <++>\nalias <++>='${INSTALL_DIR}/<++>.py'" >> ~/.bash_aliases
 git pull
 ```
 
-## Documentation
-See <++> 
-
-## Changelog
-See <++>
-
 ## License and EULA
 Unmodified [MIT license](https://opensource.org/licenses/MIT)
 
 See `LICENSE.md`
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-## Contributing
-
-I welcome any suggestion, corrections or improvements via push requests or email.
-
-Please do report any bugs with:
-
-- the error message,
-- the log,
-- the steps to reproduce it,
-- the OS type and version
