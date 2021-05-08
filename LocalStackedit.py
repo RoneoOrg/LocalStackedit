@@ -15,7 +15,7 @@ try:
 	from selenium.webdriver.common.keys import Keys
 	from pynput import keyboard
 except ModuleNotFoundError as e:
-	print(f"Missing dependency: {e}. Run:\npip install -r requirements.txt")
+	print(f"ERROR - Missing dependency: {e}.\nRun:\npip install -r requirements.txt")
 	exit(1)
 
 # ==============================================================================
@@ -96,6 +96,7 @@ def is_alive() -> bool:
 
 def on_close() -> None:
 	global browser
+	global h
 	# backup cookies
 	if is_alive():
 		with open(COOKIES_FILE, "wb") as f:
@@ -104,6 +105,7 @@ def on_close() -> None:
 		browser.close()
 	else:
 		print("Browser is dead. Cookies unsaved.")
+	h.stop()
 	print("Bye.")
 
 
@@ -164,9 +166,9 @@ if __name__ == "__main__":
 
 		from time import sleep
 		# Wait for the document title to be set
-		while browser.title != f"Stackedit - {docTitle}":
-			print(browser.title)
-			sleep(.1)
+		# It takes time for the windows title to be set
+		# according to the document title
+		sleep(.5)
 
 		import Xlib
 		import Xlib.display
@@ -200,8 +202,13 @@ if __name__ == "__main__":
 			else:
 				print("ain't stackedit")
 
+
 		def on_quit_shortcut():
-			print("Quiting...")
+			global windowName
+			if get_focused_window() == windowName:
+				on_close()
+			else:
+				print(f"INFO - Quit shortcut pressed, but the window {get_focused_window()} is not the proper one {windowName}")
 
 		with keyboard.GlobalHotKeys({
 			"<ctrl>+s": on_save_shortcut,
