@@ -13,6 +13,7 @@ try:
 	from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException, WebDriverException
 	from selenium.webdriver.remote.command import Command
 	from selenium.webdriver.common.keys import Keys
+	from pynput import keyboard
 except ModuleNotFoundError as e:
 	print(f"Missing dependency: {e}. Run:\npip install -r requirements.txt")
 	exit(1)
@@ -158,6 +159,75 @@ if __name__ == "__main__":
 		with open(sys.argv[1], "r") as f:
 			browser.execute_script("arguments[0].innerHTML=arguments[1]", editorField, f.read())
 
+		# Set the windows title to be grabbed by Xlib
+		browser.execute_script("document.title=arguments[0]", f"Stackedit - {docTitle}")
+
+		from time import sleep
+		# Wait for the document title to be set
+		while browser.title != f"Stackedit - {docTitle}":
+			print(browser.title)
+			sleep(.1)
+
+		import Xlib
+		import Xlib.display
+
+		disp = Xlib.display.Display()
+		root = disp.screen().root
+
+		NET_WM_NAME = disp.intern_atom('_NET_WM_NAME')
+		NET_ACTIVE_WINDOW = disp.intern_atom('_NET_ACTIVE_WINDOW')
+
+		root.change_attributes(event_mask=Xlib.X.FocusChangeMask)
+
+		def get_focused_window():
+			try:
+				window_id = root.get_full_property(NET_ACTIVE_WINDOW, Xlib.X.AnyPropertyType).value[0]
+				window = disp.create_resource_object('window', window_id)
+				window.change_attributes(event_mask=Xlib.X.PropertyChangeMask)
+				window_name = window.get_full_property(NET_WM_NAME, 0).value
+			except Xlib.error.XError: #simplify dealing with BadWindow
+				window_name = None
+			
+			return window_name
+
+		windowName = get_focused_window()
+
+		# Setup keyboard listener
+		def on_save_shortcut():
+			global windowName
+			if get_focused_window() == windowName:
+				print(f"Saving...")
+			else:
+				print("ain't stackedit")
+
+		def on_quit_shortcut():
+			print("Quiting...")
+
+		with keyboard.GlobalHotKeys({
+			"<ctrl>+s": on_save_shortcut,
+			"<ctrl>+q": on_quit_shortcut
+		}) as h:
+			h.join()
+
+		# Monitor focused window
+		# previousFocusedWin = None
+
+		# while True:
+		# 	try:
+		# 		window_id = root.get_full_property(NET_ACTIVE_WINDOW, Xlib.X.AnyPropertyType).value[0]
+		# 		window = disp.create_resource_object('window', window_id)
+		# 		window.change_attributes(event_mask=Xlib.X.PropertyChangeMask)
+		# 		window_name = window.get_full_property(NET_WM_NAME, 0).value
+		# 	except Xlib.error.XError: #simplify dealing with BadWindow
+		# 		window_name = None
+			
+		# 	if window_name != previousFocusedWin and window_name == b"StackEdit - Brave":
+		# 		print("Focused")
+		# 	elif window_name == b"StackEdit - Brave":
+		# 		print("Still stackedit")
+		# 	else: print("not stackedit")
+		# 	previousFocusedWin = window_name
+		# 	event = disp.next_event()
 		# TODO Save on CTRL+S
 		# Menu button: <button> tour-step-anchor menu
 		#	<div> inner     Import/export
