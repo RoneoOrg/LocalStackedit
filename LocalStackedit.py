@@ -22,24 +22,20 @@ except ModuleNotFoundError as e:
 #                                     SETUP
 # ==============================================================================
 
-PLATFORM = platform.system()
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 COOKIES_FILE = os.path.join(SCRIPT_PATH, "cookies.pkl")
 
 
-if PLATFORM == "Windows":
-	WEBDRIVER = os.path.join(SCRIPT_PATH, "Webdrivers", "chromedriver.exe")
-	BRAVE_PATH = subprocess.check_output(["where", "brave-browser"]).decode("utf-8")
-elif PLATFORM == "Linux":
+if platform.system() == "Linux":
 	WEBDRIVER = os.path.join(SCRIPT_PATH, "Webdrivers", "chromedriver_linux64")
 	BRAVE_PATH = subprocess.check_output(["which", "brave-browser"]).decode("utf-8")
 else:
-	raise NotImplementedError("This script doesn't deal with MacOS")
+	raise NotImplementedError(f"ERROR - This script is not compatible with {platform.system()}")
 	exit(1)
 
 # For some reason, trailing spaces are added to the output
 BRAVE_PATH = BRAVE_PATH.strip()
-print("Brave binary path: ", BRAVE_PATH)
+print("INFO - Brave binary path: ", BRAVE_PATH)
 OPTION = webdriver.ChromeOptions()
 OPTION.binary_location = BRAVE_PATH
 
@@ -49,9 +45,9 @@ OPTION.add_argument("--user-data-dir=" + DATA_DIR)
 if not os.path.exists(DATA_DIR):
 	IS_FIRST_LAUNCH = True
 	os.mkdir(DATA_DIR) 
-	print(f"User data directory created:\n{DATA_DIR}")
+	print(f"INFO - User data directory created: {DATA_DIR}")
 else:
-	print(f"Reusing prexisting user data directory:\n{DATA_DIR}")
+	print(f"INFO - Reusing prexisting user data directory: {DATA_DIR}")
 
 # ==============================================================================
 #                                BROWSER ACTIONS
@@ -79,7 +75,7 @@ def wait_for_element(element2Find: str) -> None:
 		else:
 			isFound = True
 
-	print(f"Page loaded with element of class {element2Find}.")
+	print(f"INFO - Page loaded with element of class: {element2Find}.")
 	return
 
 
@@ -101,12 +97,12 @@ def on_close() -> None:
 	if is_alive():
 		with open(COOKIES_FILE, "wb") as f:
 			pickle.dump(browser.get_cookies(), f)
-		print("Cookies saved.")
+		print("INFO - Cookies saved.")
 		browser.close()
 	else:
-		print("Browser is dead. Cookies unsaved.")
+		print("WARN - Browser is dead. Cookies unsaved.")
 	h.stop()
-	print("Bye.")
+	print("INFO - Bye.")
 
 
 # ==============================================================================
@@ -115,7 +111,7 @@ def on_close() -> None:
 if __name__ == "__main__":
 	# Check user input
 	if len(sys.argv) < 2:
-		print("The filename to open should be provided.")
+		print("ERROR - The filename to open should be provided.")
 		exit(1)
 
 	try:
@@ -127,18 +123,18 @@ if __name__ == "__main__":
 				)
 		except Exception as e:
 			print(e)
-			print("It's seem an instance of brave is already running. Only one instance allowed.")
+			print("ERROR - It's seem an instance of brave is already running. Only one instance allowed.")
 			exit(1)
 		# Loads cookies
 		if os.path.exists(COOKIES_FILE):
-			print("Loading cookies...")
+			print("INFO - Loading cookies...")
 			with open(COOKIES_FILE, "rb") as f:
 				cookies = pickle.load(f)
 			for c in cookies:
 				browser.add_cookies(c)
 			browser.refresh()
 		else:
-			print("No cookies file")
+			print("INFO - No cookies file")
 
 		# Open stakedit page
 		browser.get("https://stackedit.io/app#")
@@ -198,7 +194,7 @@ if __name__ == "__main__":
 		def on_save_shortcut():
 			global windowName
 			if get_focused_window() == windowName:
-				print(f"Saving...")
+				print(f"INFO - Saving...")
 			else:
 				print("ain't stackedit")
 
@@ -216,25 +212,6 @@ if __name__ == "__main__":
 		}) as h:
 			h.join()
 
-		# Monitor focused window
-		# previousFocusedWin = None
-
-		# while True:
-		# 	try:
-		# 		window_id = root.get_full_property(NET_ACTIVE_WINDOW, Xlib.X.AnyPropertyType).value[0]
-		# 		window = disp.create_resource_object('window', window_id)
-		# 		window.change_attributes(event_mask=Xlib.X.PropertyChangeMask)
-		# 		window_name = window.get_full_property(NET_WM_NAME, 0).value
-		# 	except Xlib.error.XError: #simplify dealing with BadWindow
-		# 		window_name = None
-			
-		# 	if window_name != previousFocusedWin and window_name == b"StackEdit - Brave":
-		# 		print("Focused")
-		# 	elif window_name == b"StackEdit - Brave":
-		# 		print("Still stackedit")
-		# 	else: print("not stackedit")
-		# 	previousFocusedWin = window_name
-		# 	event = disp.next_event()
 		# TODO Save on CTRL+S
 		# Menu button: <button> tour-step-anchor menu
 		#	<div> inner     Import/export
