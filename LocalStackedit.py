@@ -49,6 +49,9 @@ if not os.path.exists(DATA_DIR):
 else:
 	print(f"INFO - Reusing prexisting user data directory: {DATA_DIR}")
 
+# No popup for saving downloads
+OPTION.add_argument("profile.default_content_settings.popups=0")
+
 # ==============================================================================
 #                                BROWSER ACTIONS
 # ==============================================================================
@@ -114,6 +117,17 @@ if __name__ == "__main__":
 		print("ERROR - The filename to open should be provided.")
 		exit(1)
 
+	docPath = os.path.dirname(os.path.realpath((sys.argv[1])))
+	docPath = "/home/aymeric/"
+	print("doc: ", docPath)
+	OPTION.add_experimental_option(
+		"prefs", 
+		{
+			"download.default_directory": docPath,
+			"download.directory_upgrade": True
+		}
+	)
+	# OPTION.add_argument(f"prefs:{profile}")
 	try:
 		# Starts the browser
 		try:
