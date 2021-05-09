@@ -2,4 +2,4 @@
 ROOT_PATH="`dirname \"$0\"`"
 source $ROOT_PATH/venv/bin/activate
 # virtualenv is now active.
-python $ROOT_PATH/LocalStackedit.py $1
+python $ROOT_PATH/LocalStackedit.py "$1"
