@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
+"""Allows to use Stackedit.io with local file, with quit on <ctrl>+'q' and save to the local file on <ctrl>+s"""
+
 # std lib
 import os
 import sys
+from time import sleep
 
-try:
-	from pynput import keyboard
-except ModuleNotFoundError as e:
-	print(f"ERROR - Missing dependency: {e}.\nRun:\npip install -r requirements.txt")
-	exit(1)
 # Modules
-from src import Browser, Stackedit, WindowManager
+from src import Browser, Stackedit, WindowManager, HotKeys
 
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -24,13 +22,15 @@ if __name__ == "__main__":
 		print("ERROR - The filename to open should be provided.")
 		exit(1)
 
-	# Set the download directory
+	# Get the opened document absolute path
 	docFile = os.path.realpath((sys.argv[1]))
 
 	try:
+		# Start Selenium
 		browser = Browser.initialize(SCRIPT_PATH)
+		# Start stackedit
 		editorField = Stackedit.initialize(sys.argv[1], browser)	
-
+		# Start the windows manager
 		rootWM, dispWM = WindowManager.initialize()
 
 		# Set the windows name for the WindowManager to know
@@ -39,32 +39,20 @@ if __name__ == "__main__":
 		# TODO Less hardcoded
 		windowName = bytes(f"{browser.title} - Brave", "utf-8")
 
-		# Setup keyboard listener
-		def on_save_shortcut():
-			global windowName
-			global editorField, docFile
-			if WindowManager.get_focused_window(rootWM, dispWM) == windowName:
-				print(f"INFO - Saving the content of editorField to {docFile}")
-				with open(docFile, "w") as f:
-					f.write(editorField.text)
-				Stackedit.make_notif(f"Document saved to {docFile}", browser)
+		# Start the keyboard listener
+		h = HotKeys.initialize(
+				SCRIPT_PATH,
+				windowName,
+				editorField,
+				docFile,
+				rootWM,
+				dispWM,
+				browser
+			)
 
-		def on_quit_shortcut():
-			global windowName
-			global h
-			global browser
-			if WindowManager.get_focused_window(rootWM, dispWM) == windowName:
-				Browser.on_close(SCRIPT_PATH, h, browser)
-			else:
-				print(f"INFO - Quit shortcut pressed, but the window {WindowManager.get_focused_window(rootWM, dispWM)} is not the proper one {windowName}")
-
-
-		with keyboard.GlobalHotKeys({
-			"<ctrl>+s": on_save_shortcut,
-			"<ctrl>+q": on_quit_shortcut
-		}) as h:
-			h.join()
-
+		# Block execution until the browser is closed
+		while Browser.is_alive(browser):
+			sleep(0.5)
 
 	except KeyboardInterrupt:
-		Browser.on_close(SCRIPT_PATH, h, browser)	
+		Browser.on_close(SCRIPT_PATH, browser)	

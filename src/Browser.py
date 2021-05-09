@@ -58,7 +58,7 @@ def is_alive(browser: object) -> bool:
 		return True
 
 
-def on_close(scriptPath: str, hotkeyHandler: object, browser: object) -> None:
+def on_close(scriptPath: str, browser: object) -> None:
 	"""Actions to perform when the user request closing the browser."""
 	# backup cookies
 	if is_alive(browser):
@@ -69,8 +69,8 @@ def on_close(scriptPath: str, hotkeyHandler: object, browser: object) -> None:
 		browser.close()
 	else:
 		print("WARN - Browser is dead. Cookies unsaved.")
-	hotkeyHandler.stop()
 	print("INFO - Bye.")
+	exit(0)
 
 
 def initialize(scriptPath: str) -> object:

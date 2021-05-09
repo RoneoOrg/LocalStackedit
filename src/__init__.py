@@ -4,3 +4,4 @@
 from . import Browser
 from . import Stackedit
 from . import WindowManager
+from . import HotKeys
