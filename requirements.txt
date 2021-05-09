@@ -1,2 +1,4 @@
 selenium==3.141.0
 urllib3==1.26.4
+pynput==1.7.3
+Xlib==0.21
