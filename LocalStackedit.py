@@ -68,6 +68,7 @@ def wait_for_element(element2Find: str) -> None:
 		browser.find_element_by_class_name(element2Find)
 	except NoSuchElementException:
 		isFound = False
+	else: isFound = True
 
 	while not isFound:
 		try:
@@ -117,17 +118,9 @@ if __name__ == "__main__":
 		print("ERROR - The filename to open should be provided.")
 		exit(1)
 
-	docPath = os.path.dirname(os.path.realpath((sys.argv[1])))
-	docPath = "/home/aymeric/"
-	print("doc: ", docPath)
-	OPTION.add_experimental_option(
-		"prefs", 
-		{
-			"download.default_directory": docPath,
-			"download.directory_upgrade": True
-		}
-	)
-	# OPTION.add_argument(f"prefs:{profile}")
+	# Set the download directory
+	docFile = os.path.realpath((sys.argv[1]))
+
 	try:
 		# Starts the browser
 		try:
@@ -204,14 +197,31 @@ if __name__ == "__main__":
 
 		windowName = get_focused_window()
 
+		def save_content(field, file_):
+			with open(file_, "w") as f:
+				f.write(field.text)
+
 		# Setup keyboard listener
 		def on_save_shortcut():
 			global windowName
+			global editorField, docFile
 			if get_focused_window() == windowName:
-				print(f"INFO - Saving...")
-			else:
-				print("ain't stackedit")
+				print(f"INFO - Saving the content of editorField to {docFile}")
+				with open(docFile, "w") as f:
+					f.write(editorField.text)
 
+				notifHtml = f"""
+<div class="notification__item flex flex--row flex--align-center">
+        <div class="notification__icon flex flex--column flex--center"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon"><path d="M 12,2C 17.5228,2 22,6.47716 22,12C 22,17.5228 17.5228,22 12,22C 6.47715,22 2,17.5228 2,12C 2,6.47716 6.47715,2 12,2 Z M 10.9999,16.5019L 17.9999,9.50193L 16.5859,8.08794L 10.9999,13.6739L 7.91391,10.5879L 6.49991,12.0019L 10.9999,16.5019 Z "></path></svg></div>
+        <div class="notification__content">
+			Document save to {docFile}
+        </div>
+    </div>
+"""
+				notifField = browser.find_element_by_class_name("notification")
+				browser.execute_script("arguments[0].innerHTML = arguments[1];", notifField, notifHtml)
+				sleep(1.)
+				browser.execute_script("arguments[0].innerHTML = '';", notifField)
 
 		def on_quit_shortcut():
 			global windowName
@@ -219,6 +229,7 @@ if __name__ == "__main__":
 				on_close()
 			else:
 				print(f"INFO - Quit shortcut pressed, but the window {get_focused_window()} is not the proper one {windowName}")
+
 
 		with keyboard.GlobalHotKeys({
 			"<ctrl>+s": on_save_shortcut,
