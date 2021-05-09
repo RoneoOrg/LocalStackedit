@@ -1,14 +1,19 @@
+# Local Stackedit
+
 This script aims to bodge the limit of [StackEdit.io](https://stackedit.io/) which cannot access local files.
+
 It opens in Brave (as an automated browser - Selenium) the file provided as first argument.
 
-The file can be saved with <kbd>ctrl</kbd> + <kbd>s</kbd> and closed with <kbd>ctrl</kbd> + <kbd>q</kbd> (or the usual ways of closing a browser, but the stackedit state won't be saved).
+The file can be saved with ctrl + s and closed with ctrl + q (or the usual ways of closing a browser, but the stackedit state won't be saved).
 
 For the moment, it allows only one instance running.
 
-**Usage**:
-`python LocalStackedit.py <filename> `
+## Usage
+
+`python LocalStackedit.py  "<filename>"`
 
 or (Linux only on a Python virtual env)
+
 `StackEdit.sh <filename>`
 
 Depends on Brave-browser (version `90.1.24.82`).
@@ -22,7 +27,8 @@ It _should_ work without too many modifications for chromium-based navigators:
 
 For Firefox: good luck, have fun.
 
-**Platforms**
+## Platforms
+
 Tested on Linux, depends on a x-server running (your distro has a windows manager).
 
 Not tested on MacOS, but should work (?). 
@@ -51,12 +57,12 @@ Clone it
 ```bash
 git clone <++> 
 ```
-**Create a virtual environnement**
-Optional
+**Create a virtual environment** (Optional)
 
 `python -m venv venv`
 
 Activate it
+
 `source ./venv/bin/activate`
 
 **Dependencies**
@@ -80,7 +86,7 @@ chmod +x ./StackEdit.sh
 
 **Bash shortcut**
 
-If you want to access it directly from the terminal (Linux and MacOsX) with the command `<++>`:
+If you want to access it directly from the terminal (Linux and MacOsX) with the command `stackedit`:
 
 ```bash
 INSTALL_DIR="TODO SET ME"
