@@ -50,6 +50,9 @@ if __name__ == "__main__":
 				browser
 			)
 
+		# Feedback to the user
+		Stackedit.make_notif("Ready to edit.", browser)
+
 		# Block execution until the browser is closed
 		while Browser.is_alive(browser):
 			sleep(0.5)
