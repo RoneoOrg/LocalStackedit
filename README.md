@@ -1,19 +1,34 @@
-﻿This script aims to bodge the limit of [StackEdit.io](https://stackedit.io/) which cannot access local files.
+This script aims to bodge the limit of [StackEdit.io](https://stackedit.io/) which cannot access local files.
 It opens in Brave (as an automated browser - Selenium) the file provided as first argument.
 
+The file can be saved with <kbd>ctrl</kbd> + <kbd>s</kbd> and closed with <kbd>ctrl</kbd> + <kbd>q</kbd> (or the usual ways of closing a browser, but the stackedit state won't be saved).
+
+For the moment, it allows only one instance running.
+
 **Usage**:
-`python LocalStackedit.py <filepath>`
+`python LocalStackedit.py <filename> `
 
 or (Linux only on a Python virtual env)
-`StackEdit.sh <filepath>`
+`StackEdit.sh <filename>`
 
-TODO: 
-- Save file as markdown and html on `ctrl + s`
-- no limit of instances (for now, it's limited to one)
+Depends on Brave-browser (version `90.1.24.82`).
 
-Depends on Brave-browser (version `90.1.24.82`)
+For future or ulterior versions of Brave, the proper driver can be downloaded on [Chrome's official website](https://chromedriver.storage.googleapis.com/index.html) and placed in the folder `Webdrivers`.
 
-For future or ulterior versions of Brave, the proper driver can be downloaded on [Chrome's official website](https://chromedriver.storage.googleapis.com/index.html).
+It _should_ work without too many modifications for chromium-based navigators:
+- change `src/Browser.initialize` line 83 for the correct browser (`which` check)
+- change the ugly hard-coded `windowName` in `LocalStackedit` line 40 by what the windows manager displays
+- maybe something else
+
+For Firefox: good luck, have fun.
+
+**Platforms**
+Tested on Linux, depends on a x-server running (your distro has a windows manager).
+
+Not tested on MacOS, but should work (?). 
+Edit `src/Browser.initialize` first to allow running on other platform than Linux, download the proper driver for MacOS and place it in the `Webdrivers` folder, and set the `WEBDRIVER` variable.
+
+Not working on Windows due to the usage of a X11 library for `src/WindowManager`
 
 ## Installation
 
@@ -21,12 +36,6 @@ For future or ulterior versions of Brave, the proper driver can be downloaded on
 
 Python version 3.6 or above
 
-_On Linux/Mac:_
-```bash
-python3 --version
-```
-
-_On Windows_:
 ```bash
 python --version
 ```
@@ -42,20 +51,6 @@ Clone it
 ```bash
 git clone <++> 
 ```
-
-**Dependencies**
-
-Install dependencies:
-
-_On Linux/Mac:_
-```bash
-pip3 install -r requirements.txt
-```
-
-_On Windows_:
-```bash
-pip install -r requirements.txt
-```
 **Create a virtual environnement**
 Optional
 
@@ -64,11 +59,23 @@ Optional
 Activate it
 `source ./venv/bin/activate`
 
+**Dependencies**
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
 **Executable**
 
-Allows execution of entry point (not needed for Windows)
+Allows execution of the entry point
 ```bash
-chmod +x <++>
+chmod +x ./LocalStackedit.py
+```
+or for the version in a virtual environment
+```bash
+chmod +x ./StackEdit.sh
 ```
 
 **Bash shortcut**
@@ -76,8 +83,8 @@ chmod +x <++>
 If you want to access it directly from the terminal (Linux and MacOsX) with the command `<++>`:
 
 ```bash
-INSTALL_DIR=""
-printf "# <++>\nalias <++>='${INSTALL_DIR}/<++>.py'" >> ~/.bash_aliases
+INSTALL_DIR="TODO SET ME"
+printf "# Stackedit\nalias stackedit='${INSTALL_DIR}/StackEdit.py'" >> ~/.bash_aliases
 ```
 
 **Update**
