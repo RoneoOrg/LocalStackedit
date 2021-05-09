@@ -1,23 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-import platform
-import os, sys
-import subprocess
-from time import sleep
-import pickle
-from urllib3.exceptions import MaxRetryError
+
+# std lib
+import os
+import sys
 
 try:
 	from pynput import keyboard
 except ModuleNotFoundError as e:
 	print(f"ERROR - Missing dependency: {e}.\nRun:\npip install -r requirements.txt")
 	exit(1)
-
-from src import Browser, Stackedit
-
-# ==============================================================================
-#                                     SETUP
-# ==============================================================================
+# Modules
+from src import Browser, Stackedit, WindowManager
 
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -36,36 +30,20 @@ if __name__ == "__main__":
 	try:
 		browser = Browser.initialize(SCRIPT_PATH)
 		editorField = Stackedit.initialize(sys.argv[1], browser)	
-		import Xlib
-		import Xlib.display
 
-		disp = Xlib.display.Display()
-		root = disp.screen().root
+		rootWM, dispWM = WindowManager.initialize()
 
-		NET_WM_NAME = disp.intern_atom('_NET_WM_NAME')
-		NET_ACTIVE_WINDOW = disp.intern_atom('_NET_ACTIVE_WINDOW')
-
-		root.change_attributes(event_mask=Xlib.X.FocusChangeMask)
-
-		def get_focused_window():
-			try:
-				window_id = root.get_full_property(NET_ACTIVE_WINDOW, Xlib.X.AnyPropertyType).value[0]
-				window = disp.create_resource_object('window', window_id)
-				window.change_attributes(event_mask=Xlib.X.PropertyChangeMask)
-				window_name = window.get_full_property(NET_WM_NAME, 0).value
-			except Xlib.error.XError: #simplify dealing with BadWindow
-				window_name = None
-			
-			return window_name
-
-		windowName = get_focused_window()
-
+		# Set the windows name for the WindowManager to know
+		# if the focus window is stackedit's and prevent
+		# shortcut actions if it's not this window
+		# TODO Less hardcoded
+		windowName = bytes(f"{browser.title} - Brave", "utf-8")
 
 		# Setup keyboard listener
 		def on_save_shortcut():
 			global windowName
 			global editorField, docFile
-			if get_focused_window() == windowName:
+			if WindowManager.get_focused_window(rootWM, dispWM) == windowName:
 				print(f"INFO - Saving the content of editorField to {docFile}")
 				with open(docFile, "w") as f:
 					f.write(editorField.text)
@@ -75,10 +53,10 @@ if __name__ == "__main__":
 			global windowName
 			global h
 			global browser
-			if get_focused_window() == windowName:
+			if WindowManager.get_focused_window(rootWM, dispWM) == windowName:
 				Browser.on_close(SCRIPT_PATH, h, browser)
 			else:
-				print(f"INFO - Quit shortcut pressed, but the window {get_focused_window()} is not the proper one {windowName}")
+				print(f"INFO - Quit shortcut pressed, but the window {WindowManager.get_focused_window(rootWM, dispWM)} is not the proper one {windowName}")
 
 
 		with keyboard.GlobalHotKeys({
