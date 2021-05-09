@@ -8,11 +8,12 @@ import platform
 import subprocess
 import pickle
 from time import sleep
+from urllib3.exceptions import MaxRetryError
 
 # dependencies
 try:
 	from selenium import webdriver
-	from selenium.common.exceptions import NoSuchElementException
+	from selenium.common.exceptions import NoSuchElementException, WebDriverException
 except ModuleNotFoundError as e:
 	print(f"ERROR - Missing dependency: {e}.\nRun:\npip install -r requirements.txt")
 	exit(1)
