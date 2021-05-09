@@ -3,6 +3,7 @@ __pycache__
 *.sqlite
 *.db
 .*.swp
+*.pkl
 .DS_Store
 .private
 .secret
