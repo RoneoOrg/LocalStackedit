@@ -6,9 +6,18 @@
 # Std libs
 from time import sleep
 import os
+import re
 # Modules
 from . import Browser
 
+
+# Funny enough, just one character needs to be replaced 
+# for Stackedit to understand it's litteral < and >
+# when used for raw html in markdown and this character in blockquotes
+# So, why work more than necessary?
+ILLEGAL_CHARS = {
+	"<": "<span class=\"token punctuation\"><</span>"
+}
 
 def make_notif(content: str, browser: object) -> None:
 	"""Popup a notification"""
@@ -47,7 +56,11 @@ def initialize(filePath: str, browser: object) -> object:
 
 		# set the content of the editor
 		with open(filePath, "r") as f:
-			browser.execute_script("arguments[0].innerHTML=arguments[1]", editorField, f.read())
+			content = f.read()
+			# Escape illegal XML characters
+			for illegal, repl in ILLEGAL_CHARS.items():
+				content = content.replace(illegal, repl)
+			browser.execute_script("arguments[0].innerHTML=arguments[1]", editorField, content)
 
 		# Set the windows title to be grabbed by Xlib
 		browser.execute_script("document.title=arguments[0]", f"Stackedit - {docTitle}")
